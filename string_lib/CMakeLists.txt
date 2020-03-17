@@ -1,1 +1,1 @@
-add_library(string_lib string.h string.cpp)
+add_library(string_lib custom_string.h custom_string.cpp)
