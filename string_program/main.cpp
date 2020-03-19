@@ -1,8 +1,16 @@
 #include "custom_string.h"
 
+#include <iostream>
+
 using namespace std;
 
 using namespace custom_string;
+
+std::ostream& operator<< (std::ostream& so, const String& str) {
+    for (size_t i = 0; i < str.len(); i++)
+        so << str[i];
+    return so;
+}
 
 String generateItem()
 {
@@ -12,7 +20,7 @@ String generateItem()
 
 int main()
 {
-    String s1="String example";
+    string s1="String example";
     cout << s1 << endl;
     String s2("str");
     cout << s2 << endl;

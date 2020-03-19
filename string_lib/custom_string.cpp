@@ -4,94 +4,97 @@ namespace custom_string {
 
 	String::String()
 	{
-		length = 0;
-		data = new char[0];
+		size = 0;
+		str = new char[0];
 	}
 
 	String::String(const String& other)
 	{
-		length = other.len();
-		data = new char[length];
-		for (unsigned int j = 0; j < length; j++)
-			data[j] = other[j];
+		size = other.size;
+		str = new char[size+1];
+		for (size_t j = 0; j < size; j++)
+			str[j] = other[j];
+		str[size] = '\0';
 	}
 
 	String::String(String&& other) noexcept
 	{
-		data = other.data;
-		length = other.length;
-		other.length = 0;
-		other.data = nullptr;
+		str = other.str;
+		size = other.size;
+		other.size = 0;
+		other.str = nullptr;
 	}
 
-	String::String(const char* c)
+	String::String(const char* _str)
 	{
-		if (c)
+		if (_str)
 		{
-			unsigned int n = 0;
-			while (c[n] != '\0') n++;
-			length = n;
-			data = new char[n];
-			for (unsigned int j = 0; j < n; j++)
-				data[j] = c[j];
+			size = strlen(_str);
+			str = new char[size + 1];
+			for (size_t i = 0; i < size; i++)
+				str[i] = _str[i];
+			str[size] = '\0';
 		}
 		else
 		{
-			length = 0;
-			data = new char[0];
+			size = 0;
+			str = new char[0];
 		}
 	}
 
 	String::~String()
 	{
-		delete[] data;
+		delete[] str;
+	}
+	size_t String::len() const
+	{
+		return size;
 	}
 
-	unsigned int String::len() const
+	size_t String::strlen(const char* _str) const
 	{
-		return length;
+		size_t size = 0;
+		while (*(_str++))
+		{
+			++size;
+		}
+		return size;
 	}
 
 	String& String::operator=(const String& other)
 	{
-		if (this == &other)
-			return *this;
-
-		delete data;
-		length = other.len();
-		data = new char[length];
-		for (unsigned int j = 0; j < length; j++)
-			data[j] = other[j];
-
+		if (this != &other)
+		{
+			delete[] str;
+			size = other.size;
+			str = new char[size+1];
+			for (size_t i = 0; i < size; i++)
+				str[i] = other[i];
+			str[size] = '\0';
+		}
 		return *this;
 	}
 
 	String& String::operator=(String&& other) noexcept
 	{
-		if (this != &other) {
-			delete[] data;
-			data = other.data;
-			length = other.length;
-			other.data = nullptr;
-			other.length = 0;
+		if (this != &other)
+		{
+			delete[] str;
+			str = other.str;
+			size = other.size;
+			other.str = nullptr;
+			other.size = 0;
 		}
 		return *this;
 	}
 
-	char String::operator[](unsigned int j) const
+	char String::operator[](size_t i) const
 	{
-		return data[j];
+		return str[i];
 	}
 
-	char& String::operator[](unsigned int j)
+	char& String::operator[](size_t i)
 	{
-		return data[j];
-	}
-
-	std::ostream& operator<<(std::ostream& so, const String& str)
-	{
-		for (int i = 0; i < str.len(); i++)
-			so << str[i];
-		return so;
+		return str[i];
 	}
 }
