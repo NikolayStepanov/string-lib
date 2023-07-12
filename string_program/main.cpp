@@ -6,11 +6,11 @@ using namespace std;
 
 using namespace custom_string;
 
-std::ostream& operator<< (std::ostream& so, const String& str) {
-    for (size_t i = 0; i < str.len(); i++)
-        so << str[i];
-    return so;
-}
+//std::ostream& operator<< (std::ostream& so, const String& str) {
+//    for (size_t i = 0; i < str.len(); i++)
+//        so << str[i];
+//    return so;
+//}
 
 String generateItem()
 {
