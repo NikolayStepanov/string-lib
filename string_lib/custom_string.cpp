@@ -12,11 +12,7 @@ String::String(const String& other)
 {
     m_size = other.m_size;
     m_str = new char[m_size + 1];
-    for (size_t i = 0; i < m_size; i++)
-    {
-        m_str[i] = other[i];
-    }
-    m_str[m_size] = '\0';
+    strlcpy(m_str, other.m_str, m_size + 1);
 }
 
 String::String(String&& other) noexcept
@@ -24,23 +20,21 @@ String::String(String&& other) noexcept
     m_str = other.m_str;
     m_size = other.m_size;
     other.m_size = 0;
-    other.m_str = new char[0];
+    other.m_str = nullptr;
 }
 
-String::String(const char* _str)
+String::String(const char* str)
 {
-    if (_str)
+    if (str)
     {
-        m_size = strlen(_str);
+        m_size = strlen(str);
         m_str = new char[m_size + 1];
-        for (size_t i = 0; i < m_size; i++)
-            m_str[i] = _str[i];
-        m_str[m_size] = '\0';
+        strlcpy(m_str, str, m_size + 1);
     }
     else
     {
         m_size = 0;
-        m_str = new char[0];;
+        m_str = nullptr;
     }
 }
 
@@ -59,26 +53,65 @@ size_t String::len() const
     return m_size;
 }
 
-size_t String::strlen(const char* _str) const
+size_t String::strlen(const char* str) const
 {
     size_t size = 0;
-    while (*(_str++))
+    while (*(str++))
     {
         size++;
     }
     return size;
 }
 
-String& String::operator = (const String& other)
+char* strlcat(char* str, const char* other_str, size_t size)
 {
-    if (this != &other)
+    if (str == nullptr && other_str == nullptr)
+    {
+        return nullptr;
+    }
+    char* ptr = str + strlen(str);
+    strlcpy(ptr, other_str, size);
+    return str;
+}
+
+size_t strlcpy(char* str, const char* other_str, size_t size)
+{
+    if (str == nullptr && other_str == nullptr)
+    {
+        return 0;
+    }
+    size_t other_str_size = strlen(other_str);
+    size_t tmp_count;
+    size_t result_size;
+    char* ptr = str;
+    if (other_str_size < size)
+    {
+        tmp_count = other_str_size;
+        result_size = other_str_size;
+    }
+    else
+    {
+        tmp_count = size - 1;
+        result_size = size - 1;
+    }
+    while (tmp_count--)
+    {
+        *ptr = *other_str;
+        ptr++;
+        other_str++;
+    }
+    *ptr = '\0';
+    return result_size;
+}
+
+String& String::operator = (const String& str)
+{
+    if (this != &str)
     {
         delete[] m_str;
-        m_size = other.m_size;
+        m_size = str.m_size;
         m_str = new char[m_size + 1];
-        for (size_t i = 0; i < m_size; i++)
-            m_str[i] = other[i];
-        m_str[m_size] = '\0';
+        strlcpy(m_str, str.m_str, m_size + 1);
     }
     return *this;
 }
@@ -96,94 +129,62 @@ String& String::operator = (String&& other) noexcept
     return *this;
 }
 
-String String::operator + (const String& other) {
-    String newString;
-    size_t newSize = m_size + other.m_size;
-    char* newStr = new char[newSize + 1];
-    for (size_t i = 0; i < m_size; i++)
-    {
-        newStr[i] = m_str[i];
-    }
-    for (size_t i = 0; i < other.m_size; i++)
-    {
-        newStr[i + m_size] = other[i];
-    }
-    newStr[newSize] = '\0';
-    newString.m_str = newStr;
-    newString.m_size = newSize;
-    return newString;
+String String::operator + (const String& str) {
+    String new_string;
+    size_t new_size = m_size + str.m_size;
+    char* new_str = new char[new_size + 1];
+    strlcpy(new_str, m_str, m_size + 1);
+    strlcat(new_str, str.m_str, str.m_size + 1);
+    new_string.m_str = new_str;
+    new_string.m_size = new_size;
+    return new_string;
 }
 
-String& String::operator += (const String& other)
+String& String::operator += (const String& str)
 {
-    size_t newSize = m_size + other.m_size;
-    char* newStr = new char[newSize + 1];
-    for (size_t i = 0; i < m_size; i++)
-    {
-        newStr[i] = m_str[i];
-    }
-    for (size_t i = 0; i < other.m_size; i++)
-    {
-        newStr[i + m_size] = other[i];
-    }
-    newStr[newSize] = '\0';
+    size_t new_size = m_size + str.m_size;
+    char* new_str = new char[new_size + 1];
+    strlcpy(new_str, m_str, m_size + 1);
+    strlcat(new_str, str.m_str, str.m_size + 1);
     delete[] m_str;
-    m_str = newStr;
-    m_size = newSize;
+    m_str = new_str;
+    m_size = new_size;
     return *this;
 }
 
-String String::operator + (const char * _str)
+String String::operator + (const char * str)
 {
-    String newString;
-    size_t sizeStr = strlen(_str);
-    size_t newSize = m_size + sizeStr;
-    char* newStr = new char[newSize + 1];
-    for (size_t i = 0; i < m_size; i++)
-    {
-        newStr[i] = m_str[i];
-    }
-    for (size_t i = 0; i < sizeStr; i++)
-    {
-        newStr[i + m_size] = _str[i];
-    }
-    newStr[newSize] = '\0';
-    newString.m_str = newStr;
-    newString.m_size = newSize;
-    return newString;
+    String new_string;
+    size_t size_str = strlen(str);
+    size_t new_size = m_size + size_str;
+    char* new_str = new char[new_size + 1];
+    strlcpy(new_str, m_str, m_size + 1);
+    strlcat(new_str, str, size_str + 1);
+    new_string.m_str = new_str;
+    new_string.m_size = new_size;
+    return new_string;
 }
 
-String& String::operator = (const char* _str){
-    if (m_str != _str)
+String& String::operator = (const char* str){
+    if (m_str != str)
     {
         delete[] m_str;
-        m_size = strlen(_str);
+        m_size = strlen(str);
         m_str = new char[m_size + 1];
-        for (size_t i = 0; i < m_size; i++)
-        {
-            m_str[i] = _str[i];
-        }
-        m_str[m_size] = '\0';
+        strlcpy(m_str, str, m_size + 1);
     }
     return *this;
 }
 
-String& String::operator += (const char* _str){
-    size_t sizeStr = strlen(_str);
-    size_t newSize = m_size + sizeStr;
-    char* newStr = new char[newSize + 1];
-    for (size_t i = 0; i < m_size; i++)
-    {
-        newStr[i] = m_str[i];
-    }
-    for (size_t i = 0; i < sizeStr; i++)
-    {
-        newStr[i + m_size] = _str[i];
-    }
-    newStr[newSize] = '\0';
+String& String::operator += (const char* str){
+    size_t size_str = strlen(str);
+    size_t new_size = m_size + size_str;
+    char* new_str = new char[new_size + 1];
+    strlcpy(new_str, m_str, m_size + 1);
+    strlcat(new_str, str, new_size + 1);
     delete[] m_str;
-    m_str = newStr;
-    m_size = newSize;
+    m_str = new_str;
+    m_size = new_size;
     return *this;
 }
 
@@ -216,24 +217,17 @@ bool String::operator > (const String& other)
     return !(*this < other);
 }
 
-String operator + (const char * _str,const String& other)
+String operator + (const char* str,const String& other)
 {
-    String newString;
-    size_t sizeStr = strlen(_str);
-    size_t newSize = sizeStr + other.m_size;
-    char* newStr = new char[newSize + 1];
-    for (size_t i = 0; i < sizeStr; i++)
-    {
-        newStr[i] = _str[i];
-    }
-    for (size_t i = 0; i < other.m_size; i++)
-    {
-        newStr[i + sizeStr] = other[i];
-    }
-    newStr[newSize] = '\0';
-    newString.m_str = newStr;
-    newString.m_size = newSize;
-    return newString;
+    String new_string;
+    size_t size_str = strlen(str);
+    size_t new_size = size_str + other.m_size;
+    char* new_str = new char[new_size + 1];
+    strlcpy(new_str, str, size_str + 1);
+    strlcat(new_str, other.m_str, other.m_size + 1);
+    new_string.m_str = new_str;
+    new_string.m_size = new_size;
+    return new_string;
 }
 
 ostream& operator << (ostream& os, const String& other)

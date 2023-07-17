@@ -24,7 +24,7 @@ int main()
     String s7 = s2;
     s7 += s2;
     cout << "s7 = s2; s7 += s2; s7 = " << s7 << endl;
-    String s8(move(s7));
+    String s8(std::move(s7));
     cout << "String s8(move(s7); s8 = " << s8 << endl;
 
     cout << "Enter strings:" << endl;
@@ -43,7 +43,6 @@ int main()
     {
         cout << str << endl;
     }
-
     system("pause");
     return 0;
 }
